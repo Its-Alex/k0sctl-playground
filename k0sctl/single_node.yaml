@@ -1,0 +1,14 @@
+apiVersion: k0sctl.k0sproject.io/v1beta1
+kind: Cluster
+metadata:
+  name: cluster
+spec:
+  hosts:
+  - ssh:
+      address: 192.168.56.10
+      user: vagrant
+      port: 22
+      keyPath: ./ssh_key/vagrant_dev
+    role: single
+  k0s:
+    version: v1.27.4+k0s.0
