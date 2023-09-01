@@ -12,9 +12,12 @@ Vagrant.configure("2") do |config|
   cluster.each_with_index do |(hostname, info), index|
 
     config.vm.define hostname do |cfg|
+      cfg.vm.box = "bento/ubuntu-22.04"
+      
+      cfg.vm.synced_folder ".", "/vagrant", disabled: true
+      cfg.vm.provision "file", source: "./ssh_key/", destination: "/home/vagrant/"
+      
       cfg.vm.provider :virtualbox do |vb, override|
-        config.vm.box = "bento/ubuntu-22.04"
-
         override.vm.hostname = hostname
         vb.name = hostname
 
@@ -22,18 +25,13 @@ Vagrant.configure("2") do |config|
         # using a specific IP.
         override.vm.network :private_network, ip: "#{info[:ip]}"
 
-        config.vm.synced_folder ".", "/vagrant", disabled: true
-        config.vm.provision "file", source: "./ssh_key/", destination: "/home/vagrant/"
-
-        config.vm.provider "virtualbox" do |vb|
-          vb.cpus = info[:cpus]
-          vb.memory = info[:mem]
-        end
-
-        config.vm.provision "shell", inline: <<-SHELL
-          cat /home/vagrant/ssh_key/vagrant_dev.pub >> /home/vagrant/.ssh/authorized_keys
-        SHELL
+        vb.cpus = info[:cpus]
+        vb.memory = info[:mem]
       end
+
+      cfg.vm.provision "shell", inline: <<-SHELL
+        cat /home/vagrant/ssh_key/vagrant_dev.pub >> /home/vagrant/.ssh/authorized_keys
+      SHELL
     end
   end
 
